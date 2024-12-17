@@ -13,30 +13,31 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
-
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            
+        $token = auth()->attempt($credentials);
+    
+        if (!$token) {
             return response()->json([
-                'user' => $user,
-                'message' => 'Login successful'
-            ]);
+                'status' => 401,
+                'message' => 'Identifiants incorrects'
+            ], 401);
         }
-
+        // Créer un cookie HTTPOnly pour stocker le token JWT
+        $cookie = cookie('token', $token, 60 * 24, null, null, false, true); // Cookie expirant dans 24 heures
         return response()->json([
-            'message' => 'Identifiants incorrects'
-        ], 401);
+            'message' => 'Connexion réussie',
+            'user' => auth()->user(),
+        ])->withCookie($cookie);
     }
 
     public function logout()
     {
         Auth::logout();
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(['message' => 'Vous avez été déconnecté avec succès']);
     }
 
-    // Route de test pour vérifier si l'utilisateur est authentifié
-    public function user()
+    // Fonction de test pour vérifier si l'utilisateur est authentifié
+    public function me()
     {
-        return response()->json(Auth::user());
+        return response()->json(auth()->user());
     }
 }
