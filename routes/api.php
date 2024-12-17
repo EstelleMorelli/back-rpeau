@@ -31,5 +31,3 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
 });
 
-// Routes pour la gestion des utilisateurs
-Route::apiResource('users', UserController::class);

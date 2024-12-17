@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,8 +33,14 @@ class AuthController extends Controller
 
     public function logout()
     {
-        Auth::logout();
-        return response()->json(['message' => 'Vous avez été déconnecté avec succès']);
+    // Supprimer le token JWT en déconnectant l'utilisateur
+    JWTAuth::invalidate(JWTAuth::getToken());
+
+    // Créer un cookie expiré pour supprimer le cookie du navigateur
+    $cookie = cookie('token', '', -1, null, null, false, true); // Expire immédiatement
+    
+    return response()->json(['message' => 'Déconnexion réussie'])
+        ->withCookie($cookie); // Ajouter le cookie expiré à la réponse
     }
 
     // Fonction de test pour vérifier si l'utilisateur est authentifié
